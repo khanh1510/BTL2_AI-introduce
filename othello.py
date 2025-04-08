@@ -84,18 +84,34 @@ class Othello:
         self.player = Board.WHITE if self.player == Board.BLACK else Board.BLACK
         return True
 
-game = Othello(8)
-print(game.board)
+    def is_goal(self):
+        for row in range(self.board.size):
+            for col in range(self.board.size):
+                if self.board[row][col] == Board.EMPTY:
+                    return False
+        return True
+    
+    def is_white_winner(self):
+        white_count = sum(cell == Board.WHITE for row in self.board for cell in row)
+        black_count = sum(cell == Board.BLACK for row in self.board for cell in row)
+        return white_count > black_count
 
-game.make_move((2, 2))
-print(game.board)
+    def play(self):
+        while not self.is_goal():
+            print(self.board)
+            move = input(f"Player {self.player}, enter your move (row col): ")
+            row, col = map(int, move.split())
+            try:
+                self.make_move((row, col))
+            except ValueError as e:
+                print(e)
+                continue
 
-game.make_move((5, 3))
-print(game.board)
+        print("Game over!")
+        if self.is_white_winner():
+            print("White wins!")
+        else:
+            print("Black wins!")
 
-game.make_move((2, 3))
-print(game.board)
-game.make_move((6, 3))
-print(game.board)
-game.make_move((7, 3))
-print(game.board)
+game = Othello()
+game.play()
