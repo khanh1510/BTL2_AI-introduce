@@ -6,22 +6,23 @@ import time
 DIRECTIONS = [(-1, -1), (-1, 0), (-1, 1),
               (0, -1),         (0, 1),
               (1, -1),  (1, 0), (1, 1)]
-class Board:
+class Board(list):
     EMPTY = 0
     BLACK = 1
     WHITE = -1
 
     def __init__(self, size=8):
+        # Khởi tạo danh sách hai chiều (mảng 2D)
         self.size = size
-        self.board = [[self.EMPTY for _ in range(size)] for _ in range(size)]
+        super().__init__([[self.EMPTY for _ in range(size)] for _ in range(size)])
         self.initialize()
 
     def initialize(self):
         mid = self.size // 2
-        self.board[mid - 1][mid - 1] = self.WHITE
-        self.board[mid][mid] = self.WHITE
-        self.board[mid - 1][mid] = self.BLACK
-        self.board[mid][mid - 1] = self.BLACK
+        self[mid - 1][mid - 1] = self.WHITE
+        self[mid][mid] = self.WHITE
+        self[mid - 1][mid] = self.BLACK
+        self[mid][mid - 1] = self.BLACK
 
     def get_valid_moves(self, player):
         return [(r, c) for r in range(self.size) for c in range(self.size)
@@ -31,16 +32,16 @@ class Board:
         row, col = index
         if not (0 <= row < self.size and 0 <= col < self.size):
             return False
-        if self.board[row][col] != self.EMPTY:
+        if self[row][col] != self.EMPTY:
             return False
         opponent = -player
         for dr, dc in DIRECTIONS:
             r, c = row + dr, col + dc
             has_opponent = False
             while 0 <= r < self.size and 0 <= c < self.size:
-                if self.board[r][c] == opponent:
+                if self[r][c] == opponent:
                     has_opponent = True
-                elif self.board[r][c] == player:
+                elif self[r][c] == player:
                     if has_opponent:
                         return True
                     break
@@ -54,28 +55,27 @@ class Board:
         row, col = index
         if not self.is_valid_move(index, player):
             return False
-        self.board[row][col] = player
+        self[row][col] = player
         opponent = -player
         for dr, dc in DIRECTIONS:
             r, c = row + dr, col + dc
             pieces_to_flip = []
             while 0 <= r < self.size and 0 <= c < self.size:
-                if self.board[r][c] == opponent:
+                if self[r][c] == opponent:
                     pieces_to_flip.append((r, c))
-                elif self.board[r][c] == player:
+                elif self[r][c] == player:
                     for rr, cc in pieces_to_flip:
-                        self.board[rr][cc] = player
+                        self[rr][cc] = player
                     break
                 else:
                     break
                 r += dr
                 c += dc
-
         return True
 
     def count_score(self):
-        black = sum(cell == self.BLACK for row in self.board for cell in row)
-        white = sum(cell == self.WHITE for row in self.board for cell in row)
+        black = sum(cell == self.BLACK for row in self for cell in row)
+        white = sum(cell == self.WHITE for row in self for cell in row)
         return black, white
 
     def is_terminal(self):
@@ -83,27 +83,96 @@ class Board:
 
     def copy(self):
         new_board = Board(self.size)
-        new_board.board = copy.deepcopy(self.board)
+        new_board[:] = [row[:] for row in self]
         return new_board
 
-weights = [
-    [ 54, 51, 34, 30, 31, 32, 41, 42 ],
-    [ 55, 50, 43, 33, 29, 28, 39, 58 ],
-    [ 23, 27,  3,  4, 25,  8, 40, 59 ],
-    [ 24, 22,  5,  0,  0,  6, 37, 60 ],
-    [ 47, 20, 14,  0,  0,  1, 35, 38 ],
-    [ 26, 21, 15,  2,  9,  7, 12, 36 ],
-    [ 49, 56, 16, 11, 10, 18, 45, 53 ],
-    [ 57, 46, 17, 13, 44, 52, 19, 48 ],
-]
+    def flipped_count(self, move, player):
+        flipped = 0
+        directions = [(-1, -1), (-1, 0), (-1, 1),
+                    (0, -1),          (0, 1),
+                    (1, -1),  (1, 0),  (1, 1)]
+        x, y = move
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            temp_flipped = 0
+            while 0 <= nx < 8 and 0 <= ny < 8 and self[nx][ny] == -player:
+                temp_flipped += 1
+                nx += dx
+                ny += dy
+            if 0 <= nx < 8 and 0 <= ny < 8 and self[nx][ny] == player:
+                flipped += temp_flipped
+        return flipped
+
+
 
 
 def evaluate(board, player):
-    # 1. Disc count
+    weights = [
+        [100, -10,  11,   6,   6,  11, -10, 100],
+        [-10, -20,   1,   2,   2,   1, -20, -10],
+        [ 10,   1,   5,   4,   4,   5,   1,  10],
+        [  6,   2,   4,   2,   2,   4,   2,   6],
+        [  6,   2,   4,   2,   2,   4,   2,   6],
+        [ 10,   1,   5,   4,   4,   5,   1,  10],
+        [-10, -20,   1,   2,   2,   1, -20, -10],
+        [100, -10,  11,   6,   6,  11, -10, 100],
+    ]
+
     black, white = board.count_score()
-    material_score = (black - white) * player
-    return material_score
-   
+    # Xác định giai đoạn trận đấu
+    # Giai đoạn early (0–12 quân): ưu tiên kiểm soát giữa bàn.
+    # Giai đoạn mid (13–50 quân): ưu tiên di chuyển linh hoạt (mobility).
+    # Giai đoạn late (sắp hết bàn): ưu tiên ăn nhiều quân (greedy).
+    total_discs = black + white    
+    if total_discs <= 12:
+        phase = 'early'
+    elif total_discs <= 50:
+        phase = 'mid'
+    else:
+        phase = 'late'
+
+    pos_score = 0
+    for i in range(8):
+        for j in range(8):
+            if board[i][j] == player:
+                pos_score += weights[i][j]
+            elif board[i][j] == -player:
+                pos_score -= weights[i][j]
+
+
+
+    my_moves = board.get_valid_moves(player)
+    opp_moves = board.get_valid_moves(-player)
+
+    if phase == 'early':
+        mobility_weight = 0.2
+    elif phase == 'mid':
+        mobility_weight = 1.0
+    else:
+        mobility_weight = 0.5
+
+    mobility_score = mobility_weight * (len(my_moves) - len(opp_moves))
+
+
+
+    greedy_score = 0
+    for move in my_moves:
+        greedy_score += board.flipped_count(move, player)
+    greedy_score *= 0.5
+
+
+    corners = [(0,0), (0,7), (7,0), (7,7)]
+    corner_score = 0
+    for i,j in corners:
+        if board[i][j] == player:
+            corner_score += 25
+        elif board[i][j] == -player:
+            corner_score -= 25
+
+
+    total_score = pos_score + mobility_score + greedy_score + corner_score
+    return total_score
+
 
 def minimax(board, depth, player, maximizing, alpha=float("-inf"), beta=float("inf"), step=None):
     if step is not None:
@@ -223,9 +292,9 @@ class OthelloGUI:
 
                 self.canvas.create_rectangle(x1, y1, x2, y2, fill="#4c566a", outline="#2e3440", width=2)
 
-                if self.board.board[r][c] == Board.BLACK:
+                if self.board[r][c] == Board.BLACK:
                     self.canvas.create_oval(x1 + 10, y1 + 10, x2 - 10, y2 - 10, fill="black", outline="")
-                elif self.board.board[r][c] == Board.WHITE:
+                elif self.board[r][c] == Board.WHITE:
                     self.canvas.create_oval(x1 + 10, y1 + 10, x2 - 10, y2 - 10, fill="white", outline="")
 
         black, white = self.board.count_score()
