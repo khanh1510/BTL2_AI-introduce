@@ -178,16 +178,13 @@ def evaluate(board, player):
     total_score = pos_score + mobility_score + greedy_score + corner_score
     return total_score
 
-def minimax(board, depth, player, maximizing, alpha=float("-inf"), beta=float("inf"), step=None):
-    if step is not None:
-        step[0] += 1
-
+def minimax(board, depth, player, maximizing, alpha=float("-inf"), beta=float("inf")):
     if depth == 0 or board.is_terminal():
         return evaluate(board, player), None
 
     valid_moves = board.get_valid_moves(player)
     if not valid_moves:
-        return minimax(board, depth - 1, -player, not maximizing, alpha, beta, step)
+        return minimax(board, depth - 1, -player, not maximizing, alpha, beta)
 
     best_move = None
     if maximizing:
@@ -195,7 +192,7 @@ def minimax(board, depth, player, maximizing, alpha=float("-inf"), beta=float("i
         for move in valid_moves:
             new_board = board.copy()
             new_board.make_move(move, player)
-            eval, _ = minimax(new_board, depth - 1, -player, False, alpha, beta, step)
+            eval, _ = minimax(new_board, depth - 1, -player, False, alpha, beta)
             if eval > max_eval:
                 max_eval = eval
                 best_move = move
@@ -208,7 +205,7 @@ def minimax(board, depth, player, maximizing, alpha=float("-inf"), beta=float("i
         for move in valid_moves:
             new_board = board.copy()
             new_board.make_move(move, player)
-            eval, _ = minimax(new_board, depth - 1, -player, True, alpha, beta, step)
+            eval, _ = minimax(new_board, depth - 1, -player, True, alpha, beta)
             if eval < min_eval:
                 min_eval = eval
                 best_move = move
@@ -347,7 +344,6 @@ class OthelloGUI:
 
 
 
-        self.total_step = 0
         self.total_score = 0
         
         
@@ -413,7 +409,6 @@ class OthelloGUI:
             self.player_vs_agent(self.player, self.depth)
     
     def agent_click(self, depth):
-        step = [0]
         process = psutil.Process(os.getpid())
         start_time = time.time()
         cpu_start = process.cpu_times()
@@ -422,7 +417,7 @@ class OthelloGUI:
         
         
         
-        score, move = minimax(self.board, depth, self.current_player, True, step = step)
+        score, move = minimax(self.board, depth, self.current_player, True)
         
         
         cpu_end = process.cpu_times()
@@ -431,7 +426,7 @@ class OthelloGUI:
         cpu_used = (cpu_end.user - cpu_start.user) + (cpu_end.system - cpu_start.system)
         mem_used = (mem_end - mem_start) / 1024  # KB
 
-        print(f"{self.current_player}, {score}, {step[0]}, {elapsed:.4f}, {cpu_used:.4f}, {mem_used:.2f}")
+        print(f"{self.current_player}, {score}, {elapsed:.4f}, {cpu_used:.4f}, {mem_used:.2f}")
 
     
         if move:
@@ -500,7 +495,7 @@ class OthelloGUI:
         # Gọi lại lượt tiếp theo sau 500ms
         self.root.after(500, lambda: self.test_agent(player, depth, seed))
 
-            
+ 
 
 if __name__ == "__main__":
     root = tk.Tk()
