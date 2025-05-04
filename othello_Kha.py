@@ -87,14 +87,14 @@ class Board:
         return new_board
 
 
-def minimax(board, depth, player, maximizing):
+def minimax(board, depth, player, maximizing, alpha=float("-inf"), beta=float("inf")):
     if depth == 0 or board.is_terminal():
         black, white = board.count_score()
         return (black - white) * player, None
 
     valid_moves = board.get_valid_moves(player)
     if not valid_moves:
-        return minimax(board, depth - 1, -player, not maximizing)
+        return minimax(board, depth - 1, -player, not maximizing, alpha, beta)
 
     best_move = None
     if maximizing:
@@ -102,20 +102,26 @@ def minimax(board, depth, player, maximizing):
         for move in valid_moves:
             new_board = board.copy()
             new_board.make_move(move, player)
-            eval, _ = minimax(new_board, depth - 1, -player, False)
+            eval, _ = minimax(new_board, depth - 1, -player, False, alpha, beta)
             if eval > max_eval:
                 max_eval = eval
                 best_move = move
+            alpha = max(alpha, eval)
+            if beta <= alpha:
+                break  # Cắt tỉa beta
         return max_eval, best_move
     else:
         min_eval = float("inf")
         for move in valid_moves:
             new_board = board.copy()
             new_board.make_move(move, player)
-            eval, _ = minimax(new_board, depth - 1, -player, True)
+            eval, _ = minimax(new_board, depth - 1, -player, True, alpha, beta)
             if eval < min_eval:
                 min_eval = eval
                 best_move = move
+            beta = min(beta, eval)
+            if beta <= alpha:
+                break  # Cắt tỉa alpha
         return min_eval, best_move
 
 
