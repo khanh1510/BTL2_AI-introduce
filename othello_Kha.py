@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import copy
 import time
+import random
 
 DIRECTIONS = [(-1, -1), (-1, 0), (-1, 1),
               (0, -1),         (0, 1),
@@ -103,8 +104,12 @@ class Board(list):
                 flipped += temp_flipped
         return flipped
 
-
-
+    def __repr__(self):
+        symbols = {self.EMPTY: '.', self.BLACK: 'B', self.WHITE: 'W'}
+        board_str = "  " + " ".join(str(i) for i in range(self.size)) + "\n"
+        for i, row in enumerate(self):
+            board_str += str(i) + " " + " ".join(symbols[cell] for cell in row) + "\n"
+        return board_str
 
 def evaluate(board, player):
     weights = [
@@ -173,7 +178,6 @@ def evaluate(board, player):
     total_score = pos_score + mobility_score + greedy_score + corner_score
     return total_score
 
-
 def minimax(board, depth, player, maximizing, alpha=float("-inf"), beta=float("inf"), step=None):
     if step is not None:
         step[0] += 1
@@ -213,46 +217,92 @@ def minimax(board, depth, player, maximizing, alpha=float("-inf"), beta=float("i
                 break
         return min_eval, best_move
 
-
+   
 class GameApp:
     def __init__(self, root):
         self.root = root
         self.root.geometry("600x700")
-        self.root.configure(bg="#2e3440")
-        self.mode = tk.StringVar(value="PvP")
-        self.difficulty = tk.StringVar(value="Medium")
-        self.depth_map = {"Easy": 6, "Medium": 8, "Hard": 10}
+        self.root.configure(bg="#2e3440")        
+        self.mode = tk.StringVar(value="PvP")  # Biến lưu chế độ chơi
+        self.player = tk.IntVar(value=1)  # Biến lưu lựa chọn player (1 hoặc 2)
+        self.depth = tk.IntVar(value=1)
+        self.depth1 = tk.IntVar(value=1)  # Biến lưu depth cho AI1
+        self.depth2 = tk.IntVar(value=5)  # Biến lưu depth cho AI2
+        self.seed = tk.IntVar(value=42)  # Biến lưu seed (dành cho TestAI)
+        
+        
         self.setup_start_screen()
 
     def setup_start_screen(self):
         self.clear_root()
-        tk.Label(self.root, text="Othello", font=("Helvetica", 28, "bold"), fg="#88c0d0", bg="#2e3440").pack(pady=20)
+        # Tạo nhãn cho chế độ chơi
+        tk.Label(self.root, text="Chọn chế độ chơi:", font=("Helvetica", 14)).pack(pady=10)
 
-        tk.Label(self.root, text="Chọn chế độ chơi:", font=("Helvetica", 14), fg="white", bg="#2e3440").pack(pady=5)
-        tk.OptionMenu(self.root, self.mode, "PvAI", "PvP", command=self.on_mode_change).pack()
+        # Tạo lựa chọn chế độ chơi
+        mode_options = ["TestAI", "PvP", "PvAI", "AIvAI"]
+        self.mode_menu = tk.OptionMenu(self.root, self.mode, *mode_options, command=self.on_mode_change)
+        self.mode_menu.pack(pady=5)
 
-        self.difficulty_frame = tk.Frame(self.root, bg="#2e3440")
-        tk.Label(self.difficulty_frame, text="Chọn độ khó (AI):", font=("Helvetica", 14), fg="white", bg="#2e3440").pack(pady=5)
-        tk.OptionMenu(self.difficulty_frame, self.difficulty, "Easy", "Medium", "Hard").pack()
-        self.difficulty_frame.pack()
+        # Các lựa chọn bổ sung tùy theo chế độ
+        self.additional_options_frame = tk.Frame(self.root)
+        self.additional_options_frame.pack()
 
-        tk.Button(self.root, text="Bắt đầu", font=("Helvetica", 14, "bold"),
-                  bg="#5e81ac", fg="white", relief="flat", command=self.start_game).pack(pady=30)
+        # Nút bắt đầu trò chơi
+        tk.Button(self.root, text="Bắt đầu", font=("Helvetica", 14), command=self.start_game).pack(pady=20)
 
-        self.on_mode_change(self.mode.get())
+        self.on_mode_change(self.mode.get())  # Đảm bảo giao diện được cập nhật ngay khi bắt đầu
+
 
     def on_mode_change(self, mode):
+        """Thay đổi giao diện khi người dùng chọn chế độ khác."""
+        # Ẩn tất cả lựa chọn thêm trước
+        for widget in self.additional_options_frame.winfo_children():
+            widget.pack_forget()
+
         if mode == "PvP":
-            self.difficulty_frame.pack_forget()
-        else:
-            self.difficulty_frame.pack()
+            # Không có lựa chọn thêm cho PvP
+            pass
+        elif mode == "PvAI":
+            # Chọn lượt đi Player (1 hoặc 2)
+            tk.Label(self.additional_options_frame, text="Chọn lượt đi của player (1 hoặc 2):", font=("Helvetica", 12)).pack(pady=5)
+            player_options = [1, 2]
+            tk.OptionMenu(self.additional_options_frame, self.player, *player_options).pack(pady=5)
+
+            tk.Label(self.additional_options_frame, text="Chọn depth (1 đến 10):", font=("Helvetica", 12)).pack(pady=5)
+            tk.Scale(self.additional_options_frame, from_=1, to=10, orient="horizontal", variable=self.depth).pack(pady=10)
+
+        elif mode == "AIvAI":
+            # Chọn depth cho cả 2 AI
+            tk.Label(self.additional_options_frame, text="Chọn depth cho AI 1 (1 đến 10):", font=("Helvetica", 12)).pack(pady=5)
+            tk.Scale(self.additional_options_frame, from_=1, to=10, orient="horizontal", variable=self.depth1).pack(pady=10)
+
+            tk.Label(self.additional_options_frame, text="Chọn depth cho AI 2 (1 đến 10):", font=("Helvetica", 12)).pack(pady=5)
+            tk.Scale(self.additional_options_frame, from_=1, to=10, orient="horizontal", variable=self.depth2).pack(pady=10)
+
+        elif mode == "TestAI":
+            tk.Label(self.additional_options_frame, text="Chọn lượt đi AI test (1 hoặc 2):", font=("Helvetica", 12)).pack(pady=5)
+            player_options = [1, 2]
+            tk.OptionMenu(self.additional_options_frame, self.player, *player_options).pack(pady=5)
+            
+            tk.Label(self.additional_options_frame, text="Chọn depth cho AI (1 đến 10):", font=("Helvetica", 12)).pack(pady=5)
+            tk.Scale(self.additional_options_frame, from_=1, to=10, orient="horizontal", variable=self.depth).pack(pady=10)
+
+            tk.Label(self.additional_options_frame, text="Chọn seed:", font=("Helvetica", 12)).pack(pady=5)
+            tk.Entry(self.additional_options_frame, textvariable=self.seed).pack(pady=10)
 
     def start_game(self):
         self.clear_root()
-        self.game = OthelloGUI(self.root,
-                               mode=self.mode.get(),
-                               ai_depth=self.depth_map[self.difficulty.get()])
-        self.game.draw_board()
+        mode = self.mode.get()
+        player = self.player.get()
+        depth = self.depth.get()
+        depth1 = self.depth1.get()
+        depth2 = self.depth2.get()
+        seed = self.seed.get()
+        
+        self.game = OthelloGUI(root=self.root, mode=mode,
+                               player=player, depth=depth, depth1=depth1, depth2=depth2, 
+                               seed=seed
+                               )
 
     def clear_root(self):
         for widget in self.root.winfo_children():
@@ -260,12 +310,18 @@ class GameApp:
 
 
 class OthelloGUI:
-    def __init__(self, root, size=8, mode="PvAI", ai_depth=3):
+    def __init__(self, root, size=8, mode="PvP", player = 1, depth = 5, depth1 = 5, depth2 = 5, seed = 42):
         self.root = root
-        self.board = Board(size)
-        self.player = Board.BLACK
+        self.size = size
         self.mode = mode
-        self.ai_depth = ai_depth
+        self.player = player
+        self.depth = depth
+        self.depth1 = depth1
+        self.depth2 = depth2
+        self.seed = seed
+        
+        self.board = Board(size)
+        self.current_player = Board.BLACK
         self.cell_size = 60
 
         self.score_label = tk.Label(root, text="", font=("Helvetica", 14), bg="#2e3440", fg="white")
@@ -273,16 +329,32 @@ class OthelloGUI:
 
         self.canvas = tk.Canvas(root, width=size * self.cell_size, height=size * self.cell_size, bg="#3b4252", bd=0, highlightthickness=0)
         self.canvas.pack()
-        self.canvas.bind("<Button-1>", self.handle_click)
+        self.canvas.bind("<Button-1>", self.player_click)
+
+
+
+        self.update_UI()
+        if self.mode == "PvP":
+            self.player_vs_player()
+        elif self.mode == "PvAI":
+            self.player_vs_agent(player=self.player, depth=self.depth)
+        elif self.mode == "AIvAI":
+            self.agent_vs_agent(depth1=self.depth1, depth2=self.depth2)
+        elif self.mode == "TestAI":
+            self.test_agent(player=self.player, depth=self.depth)
+
+
+
+
 
         self.total_step = 0
         self.total_score = 0
-
-
-
-
-    def draw_board(self):
+        
+        
+    def update_UI(self):
         self.canvas.delete("all")
+        
+        # Vẽ lại bàn cờ
         for r in range(self.board.size):
             for c in range(self.board.size):
                 x1 = c * self.cell_size
@@ -299,69 +371,54 @@ class OthelloGUI:
 
         black, white = self.board.count_score()
         self.score_label.config(text=f"Đen: {black} | Trắng: {white}")
+        
+        # Lấy các nước đi hợp lệ
+        valid_move = self.board.get_valid_moves(self.current_player)
+        self.valid_moves = valid_move  # Lưu trữ các nước đi hợp lệ
 
-    def handle_click(self, event):
+        for row, col in valid_move:
+            cx = col * self.cell_size + self.cell_size // 2
+            cy = row * self.cell_size + self.cell_size // 2
+            r = 5  # bán kính dấu chấm
+            self.canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill="red", outline="red")
+        
+        # Kiểm tra nếu trò chơi kết thúc
+        if self.board.is_terminal():
+            self.show_result()
+            return  # Dừng gọi thêm update_UI sau khi trò chơi kết thúc
+        
+        if not self.board.get_valid_moves(self.current_player):
+            messagebox.showinfo("Mất lượt", "Không có nước đi hợp lệ! Mất lượt.")
+            self.current_player = -self.current_player
+
+            # Kiểm tra lại người chơi mới có nước đi không
+            if not self.board.get_valid_moves(self.current_player):
+                self.show_result()  # Cả hai đều không có nước đi → kết thúc
+            else:
+                self.update_UI()  # Chỉ cập nhật nếu người kia có thể đi
+
+        
+    def player_click(self, event):
         row = event.y // self.cell_size
         col = event.x // self.cell_size
-        if not self.board.is_valid_move((row, col), self.player):
+
+        if not self.board.is_valid_move((row, col), self.current_player):
             return
 
-        self.board.make_move((row, col), self.player)
-        self.player = -self.player
-        self.draw_board()
-
-        if self.board.is_terminal():
-            self.show_result()
-            return
-
-        # Nếu người chơi tiếp theo không có nước đi, mất lượt
-        if not self.board.get_valid_moves(self.player):
-            messagebox.showinfo("Mất lượt", "Không có nước đi hợp lệ! Mất lượt.")
-            self.player = -self.player  # Trả lại lượt
-            self.draw_board()
-
-            if self.board.is_terminal():
-                self.show_result()
-                return
-
-        if self.mode == "PvAI" and self.player == Board.WHITE:
-            self.root.after(500, self.ai_move)
-
-
-    def ai_move(self):
-        if not self.board.get_valid_moves(self.player):
-            messagebox.showinfo("Máy mất lượt", "Máy không có nước đi hợp lệ! Mất lượt.")
-            self.player = -self.player
-            self.draw_board()
-
-            return
-        step = [0]
-        start_time = time.time()
-        score, move = minimax(self.board, self.ai_depth, self.player, True, step=step)
+        self.board.make_move((row, col), self.current_player)
+        self.current_player = -self.current_player
+        self.update_UI()
         
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(score, step[0], elapsed_time)
-
-
+        if self.mode == "PvAI":
+            self.player_vs_agent(self.player, self.depth)
+    
+    def agent_click(self, depth):
+        _, move = minimax(self.board, depth, self.current_player, True)
+    
         if move:
-            self.board.make_move(move, self.player)
-            self.player = -self.player
-            self.draw_board()
-
-        if self.board.is_terminal():
-            self.show_result()
-            return
-
-        # Nếu sau lượt của máy, người chơi cũng không có nước đi
-        if not self.board.get_valid_moves(self.player):
-            messagebox.showinfo("Bạn mất lượt", "Bạn không có nước đi hợp lệ! Mất lượt.")
-            self.player = -self.player
-            self.draw_board()
-
-            if self.mode == "PvAI" and self.player == Board.WHITE:
-                self.root.after(500, self.ai_move)
-
+            self.board.make_move(move, self.current_player)
+            self.current_player = -self.current_player
+            self.update_UI()
 
     def show_result(self):
         black, white = self.board.count_score()
@@ -373,7 +430,58 @@ class OthelloGUI:
             winner = "Hòa!"
         messagebox.showinfo("Kết thúc", f"{winner}\nĐen: {black}, Trắng: {white}")
         self.root.quit()
+    
+    def player_vs_player(self):
+        self.canvas.bind("<Button-1>", self.player_click)
+        self.update_UI()
 
+
+    def player_vs_agent(self, player, depth):
+        if self.board.is_terminal():
+            self.show_result()
+            return
+
+        if self.current_player == player:
+            self.update_UI()
+        else:
+            self.root.after(500, lambda: self.agent_click_with_continue(player, depth))
+
+
+    def agent_vs_agent(self, depth1, depth2):
+        if self.board.is_terminal():
+            self.show_result()
+            return
+
+        if self.current_player == 1:
+            self.agent_click(depth1)
+        else:
+            self.agent_click(depth2)
+
+        # Gọi lại lượt tiếp theo sau 500ms
+        self.root.after(500, lambda: self.agent_vs_agent(depth1, depth2))
+
+            
+    def test_agent(self, player, depth, seed=0):
+        random.seed(seed)
+
+        if self.board.is_terminal():
+            self.show_result()
+            return
+
+        if self.current_player == player:
+            self.agent_click(depth)
+        else:
+            valid_moves = self.board.get_valid_moves(self.current_player)
+            if valid_moves:
+                move = random.choice(valid_moves)
+                self.board.make_move(move, self.current_player)
+                self.current_player = -self.current_player
+                self.update_UI()
+
+        # Gọi lại lượt tiếp theo sau 500ms
+        self.root.after(500, lambda: self.test_agent(player, depth, seed))
+
+            
 
 if __name__ == "__main__":
     root = tk.Tk()
