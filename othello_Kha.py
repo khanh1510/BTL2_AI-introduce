@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
-import copy
-import time
+import time, psutil, os
 import random
+import csv
 
 DIRECTIONS = [(-1, -1), (-1, 0), (-1, 1),
               (0, -1),         (0, 1),
@@ -413,7 +413,26 @@ class OthelloGUI:
             self.player_vs_agent(self.player, self.depth)
     
     def agent_click(self, depth):
-        _, move = minimax(self.board, depth, self.current_player, True)
+        step = [0]
+        process = psutil.Process(os.getpid())
+        start_time = time.time()
+        cpu_start = process.cpu_times()
+        mem_start = process.memory_info().rss
+        
+        
+        
+        
+        score, move = minimax(self.board, depth, self.current_player, True, step = step)
+        
+        
+        cpu_end = process.cpu_times()
+        mem_end = process.memory_info().rss
+        elapsed = time.time() - start_time
+        cpu_used = (cpu_end.user - cpu_start.user) + (cpu_end.system - cpu_start.system)
+        mem_used = (mem_end - mem_start) / 1024  # KB
+
+        print(f"{self.current_player}, {score}, {step[0]}, {elapsed:.4f}, {cpu_used:.4f}, {mem_used:.2f}")
+
     
         if move:
             self.board.make_move(move, self.current_player)
