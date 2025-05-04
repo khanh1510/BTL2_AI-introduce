@@ -444,7 +444,7 @@ class OthelloGUI:
         if self.current_player == player:
             self.update_UI()
         else:
-            self.root.after(500, lambda: self.agent_click_with_continue(player, depth))
+            self.root.after(500, lambda: self.agent_click(depth))
 
 
     def agent_vs_agent(self, depth1, depth2):
