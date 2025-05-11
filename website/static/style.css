@@ -1,0 +1,251 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Nicer font */
+  background-color: #e8f5e9; /* Lighter, softer green background */
+  color: #333;
+  font-size: 16px; /* Base font size for better responsiveness */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #1b5e20; /* Darker green for headings */
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 2.5em;
+}
+
+.game-interface {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  width: auto; /* Fit content */
+  max-width: 90%;
+}
+
+.score-board {
+  font-size: 1.4em; /* Increased font size */
+  font-weight: bold;
+  color: #2e7d32; /* Green for scores */
+  margin-bottom: 20px; /* Space below scores */
+  padding: 10px 20px;
+  background-color: #f1f8e9; /* Light green background for score area */
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-around; /* Distribute score elements */
+  width: 100%;
+  max-width: 400px; /* Limit width of score board */
+  box-sizing: border-box;
+}
+
+#black-score-display, #white-score-display {
+  padding: 5px 10px;
+}
+
+.game-container {
+  position: relative;
+  /* Removed fixed width/height, will be determined by table */
+}
+
+.overlay {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6); /* Darker overlay */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  border-radius: 8px; /* Match game board container */
+}
+
+.overlay-content {
+  background: white;
+  padding: 25px 30px; /* Increased padding */
+  border-radius: 10px; /* Softer corners */
+  width: auto; /* Fit content */
+  min-width: 280px; /* Minimum width */
+  font-size: 1.1rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.overlay-content label {
+  margin-right: 10px;
+  font-weight: 500;
+}
+.overlay-content select, 
+.overlay-content input[type="submit"] {
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.overlay-content input[type="submit"] {
+  background-color: #4CAF50; /* Green submit button */
+  color: white;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+.overlay-content input[type="submit"]:hover {
+  background-color: #388E3C; /* Darker green on hover */
+}
+
+.note {
+  font-size: 1rem; 
+  margin-top: -20px; /* Adjusted */
+  color: #555;
+}
+
+.centered-content { /* For home.html */
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 40px); /* Adjust for padding/margin */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.game-board {
+  margin: 0 auto; /* Centered, remove top/bottom margin from here */
+  border-collapse: separate; /* Allows for border-spacing and rounded corners on cells */
+  border-spacing: 1px; /* Slight space between cells */
+  background-color: #2e7d32; /* Darker green for board lines/background */
+  border-radius: 8px; /* Rounded corners for the board itself */
+  overflow: hidden; /* To clip cell corners */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.cell {
+  width: 55px;  /* Slightly larger cells */
+  height: 55px; /* Slightly larger cells */
+  background-color: #388e3c; /* Medium green for cells */
+  border: 1px solid #2e7d32; /* Darker border for cells */
+  text-align: center;
+  vertical-align: middle;
+  cursor: default; /* Default cursor, will change for valid moves */
+}
+
+.black-disc, .white-disc, .grey-disc {
+  width: 80%; /* Discs smaller than cell */
+  height: 80%;
+  border-radius: 50%;
+  margin: auto; /* Center disc in cell */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Subtle shadow for discs */
+}
+
+.black-disc {
+  background-color: black;
+}
+
+.white-disc {
+  background-color: white;
+}
+
+.grey-disc {
+  background-color: #9e9e9e; /* Softer grey */
+  opacity: 0.7; /* Slightly more opaque */
+  cursor: pointer; /* Indicate clickability */
+  transition: opacity 0.2s ease-in-out;
+}
+.grey-disc:hover {
+  opacity: 1;
+}
+
+
+.clickable-box { /* For home.html */
+  margin: 20px; /* Increased margin */
+  padding: 15px 25px; /* Increased padding */
+  text-align: center;
+  border: 2px solid #4CAF50; /* Green border */
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.clickable-box a {
+  text-decoration: none;
+  font-size: 1.5rem; /* Larger font */
+  color: #4CAF50; /* Green text */
+  font-weight: 500;
+}
+
+.clickable-box:hover {
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+  transform: translateY(-2px); /* Slight lift effect */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.clickable-box:hover a {
+  color: white;
+}
+
+.message-box {
+  min-height: 25px; /* Ensure space even if hidden */
+  visibility: hidden;
+  text-align: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  color: #d32f2f; /* Reddish for messages, can be adapted */
+  font-weight: 500;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: #ffebee; /* Light red background */
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+.color-selection-message {
+  text-align: center;
+  margin-bottom: 15px; /* Space below message */
+  font-size: 1rem; /* Slightly larger */
+  color: #1b5e20; /* Dark green */
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #c8e6c9; /* Very light green */
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+#reset-game-container {
+  /* position: absolute; bottom: 20px; right: 20px; -- Removed absolute positioning */
+  margin-top: 20px; /* Add space above reset button */
+  text-align: center; /* Center the button */
+  width: 100%;
+}
+
+#reset-game-button {
+  background-color: #f44336; /* Red for reset/danger */
+  color: white;
+  padding: 10px 20px; /* Adjusted padding */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#reset-game-button:hover {
+  background-color: #d32f2f; /* Darker red on hover */
+}
