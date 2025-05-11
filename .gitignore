@@ -4,3 +4,5 @@ venv/
 .vscode/
 .DS_Store
 .env
+data/
+finetuned_gpt2/
