@@ -5,6 +5,7 @@ from .player import Player, PlayerType
 from ..ai.randomAgent import getRandomMove
 from ..constants import DIRECTIONS, BOARD_SIZE
 from ..ai.minimax.algorithm import get_minimax_move
+import logging
 
 class Game:
 
@@ -252,6 +253,31 @@ class Game:
                 self.next_move = getRandomMove(self) # Dự phòng
                 if self.next_move:
                     print(f"LSTM player missing model, fallback to random: {self._coordinate_to_notation(self.next_move[0], self.next_move[1])}")
+        elif player.player_type == PlayerType.GPT2: # <-- XỬ LÝ CHO GPT2
+            if player.ml_model and hasattr(player.ml_model, 'infer_gpt2'):
+                logging.debug(f"GPT-2 input history: '{self.move_history_str}'")
+                notation_move = player.ml_model.infer_gpt2(self.move_history_str)
+                logging.debug(f"GPT-2 raw output notation: '{notation_move}'")
+                self.next_move = self._notation_to_coordinate(notation_move)
+
+                if self.next_move is None or self.board.state[self.next_move[0], self.next_move[1]] != SquareType.VALID:
+                    logging.warning(f"Cảnh báo: GPT-2 model trả về nước đi không hợp lệ ('{notation_move}' -> {self.next_move}) hoặc ô không phải VALID.")
+                    # ... (in các nước đi hợp lệ)
+                    for r_idx in range(BOARD_SIZE): # In ra các nước đi hợp lệ
+                        for c_idx in range(BOARD_SIZE):
+                            if self.board.state[r_idx, c_idx] == SquareType.VALID:
+                                logging.debug(f"  - Valid: {self._coordinate_to_notation(r_idx, c_idx)}")
+                    logging.info("GPT-2 sẽ chọn ngẫu nhiên.")
+                    self.next_move = getRandomMove(self)
+                    if self.next_move:
+                         logging.info(f"GPT-2 fallback to random move: {self._coordinate_to_notation(self.next_move[0], self.next_move[1])}")
+                    else:
+                         logging.info("GPT-2 fallback, no random move available either.")
+            else:
+                logging.error("Lỗi: GPT-2 Player không có instance ml_model hoặc thiếu hàm infer_gpt2.")
+                self.next_move = getRandomMove(self)
+                if self.next_move:
+                    logging.info(f"GPT-2 player missing model, fallback to random: {self._coordinate_to_notation(self.next_move[0], self.next_move[1])}")
 
     def discs_to_flip(self, row, col):
 
@@ -302,15 +328,10 @@ class Game:
 
         self.flip()
 
-        # Cập nhật lịch sử nước đi SAU KHI nước đi đã được thực hiện
-        # VÀ TRƯỚC KHI thay đổi lượt chơi
         move_notation = self._coordinate_to_notation(row, col)
-        if move_notation: # Chỉ thêm vào lịch sử nếu nước đi hợp lệ
+        if move_notation:
             self.move_history_str += move_notation
-            # logging.debug(f"Move history updated in make_move: '{self.move_history_str}'")
-        else:
-            # logging.warning(f"Không thể chuyển đổi nước đi ({row},{col}) thành ký hiệu, không cập nhật lịch sử.")
-            pass
+
 
     def is_board_full(self):
 

@@ -22,54 +22,50 @@ def get_global_ml_model():
     global _ml_model_global_instance
     if _ml_model_global_instance is None:
         try:
-            logging.info("Đang tải ML model cho ứng dụng web...")
+            logging.info("VIEWS: Đang tải ML model cho ứng dụng web...")
             _ml_model_global_instance = Model()
-            if _ml_model_global_instance.lstm is None:
-                 logging.warning("CẢNH BÁO WEB: Không thể tải model LSTM.")
-            else:
-                 logging.info("Model LSTM đã được tải thành công cho web.")
         except Exception as e:
-            logging.error(f"LỖI WEB: Không thể khởi tạo ML Model: {e}")
+            logging.error(f"VIEWS: LỖI WEB: Không thể khởi tạo ML Model: {e}")
     return _ml_model_global_instance
 
 def _attach_models_to_game_players(game_instance):
-    if not game_instance:
-        return
-    
+    if not game_instance: return
     ml_model = get_global_ml_model()
     if ml_model:
-        if game_instance.player_black.player_type in [PlayerType.LSTM]: # Thêm PlayerType.GPT2 nếu có
+        player_types_needing_model = [PlayerType.LSTM, PlayerType.GPT2]
+        if game_instance.player_black.player_type in player_types_needing_model:
             game_instance.player_black.ml_model = ml_model
-            # logging.debug(f"Gắn model cho BLACK player ({game_instance.player_black.player_type.value})")
-        if game_instance.player_white.player_type in [PlayerType.LSTM]: # Thêm PlayerType.GPT2 nếu có
+            # logging.debug(f"VIEWS: Đã gắn model cho BLACK player ({game_instance.player_black.player_type.value})")
+        if game_instance.player_white.player_type in player_types_needing_model:
             game_instance.player_white.ml_model = ml_model
+            # logging.debug(f"VIEWS: Đã gắn model cho WHITE player ({game_instance.player_white.player_type.value})")
 
 
 def create_player_from_type_str(type_str, color_enum, state_evaluator):
-    model_instance = get_global_ml_model() # Lấy instance model
-
+    model_instance = get_global_ml_model()
     if type_str == "USER":
         return Player(PlayerType.USER, color_enum)
     elif type_str == "RANDOM":
         return Player(PlayerType.RANDOM, color_enum)
-    elif type_str == "MINIMAX_1":
-        return Player(PlayerType.MINIMAX, color_enum, state_evaluator, 1)
-    elif type_str == "MINIMAX_2":
-        return Player(PlayerType.MINIMAX, color_enum, state_evaluator, 2)
-    elif type_str == "MINIMAX_3":
-        return Player(PlayerType.MINIMAX, color_enum, state_evaluator, 3)
-    elif type_str == "MINIMAX_4":
-        return Player(PlayerType.MINIMAX, color_enum, state_evaluator, 4)
+    elif type_str.startswith("MINIMAX_"):
+        try:
+            depth = int(type_str.split('_')[1])
+            return Player(PlayerType.MINIMAX, color_enum, state_evaluator, depth)
+        except (IndexError, ValueError):
+            logging.warning(f"VIEWS: Độ sâu Minimax không hợp lệ '{type_str}', dùng Random.")
+            return Player(PlayerType.RANDOM, color_enum)
     elif type_str == "LSTM":
-        # Khi tạo player ban đầu, ta có thể truyền model instance.
-        # Lúc này player_black/white là các object mới, không phải từ session.
         if model_instance and model_instance.lstm:
             return Player(PlayerType.LSTM, color_enum, ml_model_instance=model_instance)
-        else:
-            logging.warning("Model LSTM không khả dụng cho web, sử dụng Random AI thay thế.")
-            return Player(PlayerType.RANDOM, color_enum)
-    # ...
-    logging.warning(f"Loại người chơi không xác định '{type_str}', sử dụng Random AI.")
+        logging.warning("VIEWS: Model LSTM không khả dụng, dùng Random.")
+        return Player(PlayerType.RANDOM, color_enum)
+    elif type_str == "GPT2":
+        if model_instance and model_instance.gpt2 and model_instance.tokenizer:
+            return Player(PlayerType.GPT2, color_enum, ml_model_instance=model_instance)
+        logging.warning("VIEWS: Model GPT-2 không khả dụng, dùng Random.")
+        return Player(PlayerType.RANDOM, color_enum)
+    
+    logging.warning(f"VIEWS: Loại người chơi không xác định '{type_str}', dùng Random.")
     return Player(PlayerType.RANDOM, color_enum)
 
 @views.route("/")
@@ -85,6 +81,8 @@ def play_game():
 
         session['player_black_type'] = player_black_type_str
         session['player_white_type'] = player_white_type_str
+        session.pop('game_instance', None)
+        session.pop('game_started', None)
         session.pop('user_color', None)
 
         state_eval = StateEvaluator(weights={

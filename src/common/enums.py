@@ -6,3 +6,4 @@ class PlayerType(Enum):
     RANDOM = 'random_agent'
     MINIMAX = 'minimax'
     LSTM = 'lstm_model'
+    GPT2 = 'gpt2_model'

@@ -1,0 +1,4 @@
+Tải và giải nén https://drive.google.com/file/d/1vbxDIM0UhccnHi3saSyB_XcM5rpj-_er/view?usp=sharing
+Làm theo đường dẫn: gpt2\content\gpt2-othello\checkpoint-500
+Kéo thư mục "checkpoint-500" ra cùng cấp với model.py (thư mục chứa file này)
+Đổi lại tên folder "checkpoint-500" thành "finetuned_gpt2"

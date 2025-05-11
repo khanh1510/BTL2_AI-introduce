@@ -6,3 +6,4 @@ venv/
 .env
 data/
 finetuned_gpt2/
+finetuned_gpt/

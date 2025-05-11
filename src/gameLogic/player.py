@@ -37,6 +37,15 @@ class Player:
                 self.ml_model = Model()
                 if self.ml_model.lstm is None: # Kiểm tra model có được load thành công không
                     raise RuntimeError("Không thể tải model LSTM cho Player.")
+        elif player_type == PlayerType.GPT2: # <-- THÊM CHO GPT2
+            if ml_model_instance and hasattr(ml_model_instance, 'gpt2') and ml_model_instance.gpt2:
+                self.ml_model = ml_model_instance
+            else:
+                print(f"Cảnh báo: Player {player_type.value} đang tự tạo instance ML model (GPT-2).")
+                self.ml_model = Model() # Sẽ cố tải cả LSTM và GPT-2
+                if not (hasattr(self.ml_model, 'gpt2') and self.ml_model.gpt2):
+                    raise RuntimeError("Không thể tải model GPT-2 cho Player.")                
+
 
     def get_offline_move(self, game):
         while True:
