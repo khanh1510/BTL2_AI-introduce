@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}OthelloAI - Play{% endblock %}
+
+{% block content %}
+  <div class="game-interface">
+    <div id="score-board" class="score-board">
+      <span id="black-score-display">Black: {{ black_score }}</span>
+      <span id="white-score-display">White: {{ white_score }}</span>
+    </div>
+
+    <div class="game-container">
+      {% if not game_started %}
+        <div id="overlay" class="overlay">
+          <div class="overlay-content">
+            <form id="player-setup-form" method="post">
+              <div style="margin-bottom: 10px;">
+                <label for="player_black_type">Black Player:</label>
+                <select name="player_black_type" id="player_black_type">
+                  <option value="USER">Người chơi</option>
+                  <option value="RANDOM">Nhập môn</option>
+                  <option value="MINIMAX_1">Dễ (AI)</option>
+                  <option value="MINIMAX_2">Trung bình (AI)</option>
+                  <option value="MINIMAX_3">Khó (AI)</option>
+                  <option value="MINIMAX_4">Rất khó (AI)</option>
+                </select>
+              </div>
+              <div>
+                <label for="player_white_type">White Player:</label>
+                <select name="player_white_type" id="player_white_type">
+                  <option value="MINIMAX_3">Khó (AI)</option>
+                  <option value="USER">Người chơi</option>
+                  <option value="RANDOM">Nhập môn</option>
+                  <option value="MINIMAX_1">Dễ (AI)</option>
+                  <option value="MINIMAX_2">Trung bình (AI)</option>
+                  <option value="MINIMAX_4">Rất khó (AI)</option>
+                </select>
+              </div>
+              <input type="submit" value="Start Game" style="margin-top: 20px;">
+            </form>
+          </div>
+        </div>
+      {% endif %}
+
+      <table class="game-board">
+        <tbody>
+          {% for row in range(8) %}
+            <tr>
+              {% for col in range(8) %}
+                {% set cell = game.board.state[row][col] %}
+                <td class="cell" data-row="{{ row }}" data-col="{{ col }}">
+                  {% if cell.name == "BLACK" %}
+                    <div class="black-disc"></div>
+                  {% elif cell.name == "WHITE" %}
+                    <div class="white-disc"></div>
+                  {% elif cell.name == "VALID" %}
+                    <div class="grey-disc"></div>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div id="message-box" class="message-box" style="visibility: hidden;"></div>
+
+    <div id="reset-game-container">
+      <button id="reset-game-button">Reset Game</button>
+    </div>
+  </div>
+
+  <div id="game-started" style="display: none;" 
+       data-game-started="{{ game_started }}"
+       data-player-black-type="{{ session.get('player_black_type', 'USER') }}"
+       data-player-white-type="{{ session.get('player_white_type', 'MINIMAX_3') }}"></div>
+
+  <script src="{{url_for('static', filename='game.js')}}"></script>
+{% endblock %}
