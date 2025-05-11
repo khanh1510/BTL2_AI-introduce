@@ -112,6 +112,7 @@ class Board(list):
         return board_str
 
 def evaluate(board, player):
+    # Trọng số cho các vị trí chiến lược
     weights = [
         [100, -10,  11,   6,   6,  11, -10, 100],
         [-10, -20,   1,   2,   2,   1, -20, -10],
@@ -121,22 +122,16 @@ def evaluate(board, player):
         [ 10,   1,   5,   4,   4,   5,   1,  10],
         [-10, -20,   1,   2,   2,   1, -20, -10],
         [100, -10,  11,   6,   6,  11, -10, 100],
-    ]
+    ] 
+    
+    # Khởi tạo các yếu tố chiến lược
+    pos_score = 0 # Đánh giá dựa trên vị trí chiến lược
+    corner_score = 0 # Chiếm góc
+    mobility_score = 0 # Đánh giá khả năng di chuyển
+    greedy_score = 0 # Cập nhật greedy_score để ưu tiên ăn nhiều quân ở cuối trận
+    coin_parity  = 0 # Tỉ lệ quân cờ
 
-    black, white = board.count_score()
-    # Xác định giai đoạn trận đấu
-    # Giai đoạn early (0–12 quân): ưu tiên kiểm soát giữa bàn.
-    # Giai đoạn mid (13–50 quân): ưu tiên di chuyển linh hoạt (mobility).
-    # Giai đoạn late (sắp hết bàn): ưu tiên ăn nhiều quân (greedy).
-    total_discs = black + white    
-    if total_discs <= 12:
-        phase = 'early'
-    elif total_discs <= 50:
-        phase = 'mid'
-    else:
-        phase = 'late'
-
-    pos_score = 0
+    # Vị trí chiến lược
     for i in range(8):
         for j in range(8):
             if board[i][j] == player:
@@ -144,39 +139,47 @@ def evaluate(board, player):
             elif board[i][j] == -player:
                 pos_score -= weights[i][j]
 
-
-
+    # Khả năng di chuyển
     my_moves = board.get_valid_moves(player)
     opp_moves = board.get_valid_moves(-player)
-
-    if phase == 'early':
-        mobility_weight = 0.2
-    elif phase == 'mid':
-        mobility_weight = 1.0
-    else:
-        mobility_weight = 0.5
-
-    mobility_score = mobility_weight * (len(my_moves) - len(opp_moves))
-
-
-
-    greedy_score = 0
+    mobility_score = (len(my_moves) - len(opp_moves))*100
+    
+    # Ăn nhiều quân ở cuối trận
     for move in my_moves:
-        greedy_score += board.flipped_count(move, player)
-    greedy_score *= 0.5
+        greedy_score += board.flipped_count(move, player)*100
 
-
+    # Tổng số quân ở các góc
     corners = [(0,0), (0,7), (7,0), (7,7)]
-    corner_score = 0
-    for i,j in corners:
+    for i, j in corners:
         if board[i][j] == player:
             corner_score += 25
         elif board[i][j] == -player:
             corner_score -= 25
 
+    # Thay đổi trọng số giai đoạn trận đấu
+    black, white = board.count_score()
+    total_discs = black + white    
+    if total_discs <= 12:
+        # Giai đoạn đầu trận
+        mobility_score *= 1.0  # Khả năng di chuyển quan trọng
+        greedy_score *= 0.5    # Ăn quân ít quan trọng hơn
+        coin_parity *= 0.2     # Tỉ lệ quân không quan trọng
+        corner_score *= 0
+    elif total_discs <= 50:
+        # Giai đoạn giữa trận
+        mobility_score *= 0.8  # Giảm trọng số di chuyển
+        greedy_score *= 1.0    # Ăn quân có tầm quan trọng vừa phải
+        coin_parity *= 0.5     # Tỉ lệ quân bắt đầu có tầm quan trọng
+    else:
+        # Giai đoạn cuối trận
+        mobility_score *= 0.5  # Giảm trọng số di chuyển
+        greedy_score *= 1.5    # Ăn quân có tầm quan trọng lớn
+        coin_parity *= 1.0     # Tỉ lệ quân cực kỳ quan trọng
+        corner_score *= 0
 
-    total_score = pos_score + mobility_score + greedy_score + corner_score
-    return total_score
+    # Tính tổng điểm chiến lược
+    score = pos_score + corner_score + mobility_score + greedy_score + coin_parity
+    return score
 
 def minimax(board, depth, player, maximizing, alpha=float("-inf"), beta=float("inf")):
     if depth == 0 or board.is_terminal():
