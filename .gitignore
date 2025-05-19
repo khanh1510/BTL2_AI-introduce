@@ -8,3 +8,4 @@ venv/
 finetuned_gpt2/
 finetuned_gpt/
 *.pkl
+src/ai/ML_DL_models/*.pkl
