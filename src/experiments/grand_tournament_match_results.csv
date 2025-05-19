@@ -1,0 +1,57 @@
+game_result,black_score,white_score,agent_black,agent_white,total_moves
+White Wins,13,51,agent_0_Random,agent_1_Minimax_D1,60
+White Wins,10,54,agent_0_Random,agent_2_Minimax_D2,60
+White Wins,10,54,agent_0_Random,agent_3_Minimax_D3,60
+Draw,32,32,agent_0_Random,agent_4_RF,60
+White Wins,22,42,agent_0_Random,agent_5_XGB,60
+White Wins,26,38,agent_0_Random,agent_6_LSTM,60
+White Wins,19,45,agent_0_Random,agent_7_GPT2,60
+Draw,32,32,agent_1_Minimax_D1,agent_0_Random,60
+Black Wins,33,31,agent_1_Minimax_D1,agent_2_Minimax_D2,60
+White Wins,30,34,agent_1_Minimax_D1,agent_3_Minimax_D3,60
+Black Wins,56,8,agent_1_Minimax_D1,agent_4_RF,60
+Black Wins,38,26,agent_1_Minimax_D1,agent_5_XGB,60
+Black Wins,44,20,agent_1_Minimax_D1,agent_6_LSTM,60
+Black Wins,55,9,agent_1_Minimax_D1,agent_7_GPT2,60
+White Wins,16,48,agent_2_Minimax_D2,agent_0_Random,60
+White Wins,31,33,agent_2_Minimax_D2,agent_1_Minimax_D1,60
+Black Wins,56,8,agent_2_Minimax_D2,agent_3_Minimax_D3,60
+Black Wins,56,8,agent_2_Minimax_D2,agent_4_RF,60
+Black Wins,42,0,agent_2_Minimax_D2,agent_5_XGB,38
+Black Wins,54,0,agent_2_Minimax_D2,agent_6_LSTM,50
+Black Wins,53,3,agent_2_Minimax_D2,agent_7_GPT2,52
+Black Wins,45,19,agent_3_Minimax_D3,agent_0_Random,60
+Black Wins,37,27,agent_3_Minimax_D3,agent_1_Minimax_D1,60
+White Wins,13,51,agent_3_Minimax_D3,agent_2_Minimax_D2,60
+Black Wins,52,12,agent_3_Minimax_D3,agent_4_RF,60
+Black Wins,56,8,agent_3_Minimax_D3,agent_5_XGB,60
+Black Wins,48,16,agent_3_Minimax_D3,agent_6_LSTM,60
+Black Wins,42,22,agent_3_Minimax_D3,agent_7_GPT2,60
+White Wins,28,36,agent_4_RF,agent_0_Random,60
+White Wins,18,46,agent_4_RF,agent_1_Minimax_D1,60
+White Wins,6,57,agent_4_RF,agent_2_Minimax_D2,59
+White Wins,1,62,agent_4_RF,agent_3_Minimax_D3,59
+Black Wins,46,18,agent_4_RF,agent_5_XGB,60
+Black Wins,36,28,agent_4_RF,agent_6_LSTM,60
+White Wins,20,44,agent_4_RF,agent_7_GPT2,60
+Black Wins,54,10,agent_5_XGB,agent_0_Random,60
+White Wins,18,46,agent_5_XGB,agent_1_Minimax_D1,60
+White Wins,11,53,agent_5_XGB,agent_2_Minimax_D2,60
+White Wins,0,47,agent_5_XGB,agent_3_Minimax_D3,43
+Black Wins,36,28,agent_5_XGB,agent_4_RF,60
+Black Wins,42,22,agent_5_XGB,agent_6_LSTM,60
+White Wins,16,48,agent_5_XGB,agent_7_GPT2,60
+White Wins,31,33,agent_6_LSTM,agent_0_Random,60
+White Wins,13,51,agent_6_LSTM,agent_1_Minimax_D1,60
+White Wins,16,48,agent_6_LSTM,agent_2_Minimax_D2,60
+White Wins,15,49,agent_6_LSTM,agent_3_Minimax_D3,60
+White Wins,25,39,agent_6_LSTM,agent_4_RF,60
+White Wins,30,34,agent_6_LSTM,agent_5_XGB,60
+Draw,32,32,agent_6_LSTM,agent_7_GPT2,60
+White Wins,28,36,agent_7_GPT2,agent_0_Random,60
+White Wins,24,40,agent_7_GPT2,agent_1_Minimax_D1,60
+White Wins,8,49,agent_7_GPT2,agent_2_Minimax_D2,53
+White Wins,9,54,agent_7_GPT2,agent_3_Minimax_D3,59
+Black Wins,46,0,agent_7_GPT2,agent_4_RF,42
+Black Wins,45,19,agent_7_GPT2,agent_5_XGB,60
+White Wins,25,39,agent_7_GPT2,agent_6_LSTM,60

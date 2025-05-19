@@ -20,7 +20,9 @@
                   <option value="USER">Người chơi</option>
                   <option value="RANDOM">Nhập môn (Random)</option>
                   <option value="LSTM">LSTM (AI)</option>
-                  <option value="GPT2">GPT-2 (AI)</option> 
+                  <option value="GPT2">GPT-2 (AI)</option>
+                  <option value="RF_MODEL">Random Forest (AI)</option> <!-- THÊM MỚI -->
+                  <option value="XGB_MODEL">XGBoost (AI)</option>    <!-- THÊM MỚI -->
                   <option value="MINIMAX_1">Dễ (Minimax)</option>
                   <option value="MINIMAX_2">Trung bình (Minimax)</option>
                   <option value="MINIMAX_3">Khó (Minimax)</option>
@@ -30,6 +32,8 @@
               <div>
                 <label for="player_white_type">White Player:</label>
                 <select name="player_white_type" id="player_white_type">
+                  <option value="RF_MODEL">Random Forest (AI)</option> <!-- THÊM MỚI -->
+                  <option value="XGB_MODEL">XGBoost (AI)</option>    <!-- THÊM MỚI -->
                   <option value="GPT2">GPT-2 (AI)</option>
                   <option value="MINIMAX_3">Khó (Minimax)</option>
                   <option value="USER">Người chơi</option>
@@ -51,13 +55,13 @@
           {% for row in range(8) %}
             <tr>
               {% for col in range(8) %}
-                {% set cell = game.board.state[row][col] %}
+                {% set cell_name = game.board.state[row][col].name if game else 'EMPTY' %}
                 <td class="cell" data-row="{{ row }}" data-col="{{ col }}">
-                  {% if cell.name == "BLACK" %}
+                  {% if cell_name == "BLACK" %}
                     <div class="black-disc"></div>
-                  {% elif cell.name == "WHITE" %}
+                  {% elif cell_name == "WHITE" %}
                     <div class="white-disc"></div>
-                  {% elif cell.name == "VALID" %}
+                  {% elif cell_name == "VALID" %}
                     <div class="grey-disc"></div>
                   {% endif %}
                 </td>
@@ -75,10 +79,10 @@
     </div>
   </div>
 
-  <div id="game-started" style="display: none;" 
+  <div id="game-started" style="display: none;"
        data-game-started="{{ game_started }}"
        data-player-black-type="{{ session.get('player_black_type', 'USER') }}"
-       data-player-white-type="{{ session.get('player_white_type', 'MINIMAX_3') }}"></div>
+       data-player-white-type="{{ session.get('player_white_type', 'RF_MODEL') }}"></div>
 
   <script src="{{url_for('static', filename='game.js')}}"></script>
 {% endblock %}

@@ -1,0 +1,9 @@
+,Wins,Draws,Losses,Points,Games_Played,Goals_For,Goals_Against,Goal_Difference
+agent_3_Minimax_D3,12,0,2,36,14,601,276,325
+agent_1_Minimax_D1,11,1,2,34,14,582,314,268
+agent_2_Minimax_D2,11,0,3,33,14,651,197,454
+agent_7_GPT2,5,1,8,16,14,388,474,-86
+agent_5_XGB,5,0,9,15,14,324,533,-209
+agent_0_Random,4,2,8,14,14,346,550,-204
+agent_4_RF,3,1,10,10,14,282,594,-312
+agent_6_LSTM,2,1,11,7,14,325,561,-236
