@@ -185,6 +185,8 @@ def main():
     feature_names = list(X_features.columns)
     X_train, X_test, y_train_orig, y_test_orig = split_data(X_features, y_target_orig)
 
+    new_dir = os.path.join(current_dir, '..', 'ai', 'ML_DL_models')
+
     rf_model = train_model(
         "Random Forest",
         RandomForestClassifier,
@@ -193,7 +195,7 @@ def main():
     )
     y_pred_labels_rf, y_pred_proba_rf = make_predictions(rf_model, X_test)
     evaluate_model_performance("Random Forest", y_test_orig, y_pred_labels_rf, y_pred_proba_rf, rf_model.classes_)
-    save_trained_model(rf_model, os.path.join(current_dir, 'rf_othello_classifier.pkl'))
+    save_trained_model(rf_model, os.path.join(new_dir, 'rf_othello_classifier.pkl'))
     plot_model_feature_importances("Random Forest", rf_model, feature_names)
 
     label_mapping_xgb = {-1: 0, 0: 1, 1: 2}
@@ -213,7 +215,7 @@ def main():
     y_pred_labels_xgb_orig = np.array([inverse_label_mapping_xgb.get(label) for label in y_pred_labels_xgb_mapped])
     
     evaluate_model_performance("XGBoost", y_test_orig, y_pred_labels_xgb_orig, y_pred_proba_xgb, xgb_model_instance.classes_)
-    save_trained_model(xgb_model_instance, os.path.join(current_dir, 'xgb_othello_classifier.pkl'))
+    save_trained_model(xgb_model_instance, os.path.join(new_dir, 'xgb_othello_classifier.pkl'))
     plot_model_feature_importances("XGBoost", xgb_model_instance, feature_names)
 
     print_section_header("All training and evaluations complete.")

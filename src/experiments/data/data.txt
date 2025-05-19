@@ -1,0 +1,4 @@
+Tải:
+othello_dataset.csv 
+othello_state_dataset.csv 
+vào thư mục data này từ đường dẫn:https://drive.google.com/drive/folders/1aBPETv39HpvDx3p1pVLDe-Ms5c4xGE_u?usp=sharing

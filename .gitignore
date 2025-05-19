@@ -4,6 +4,7 @@ venv/
 .vscode/
 .DS_Store
 .env
-data/
+*.csv
 finetuned_gpt2/
 finetuned_gpt/
+*.pkl
